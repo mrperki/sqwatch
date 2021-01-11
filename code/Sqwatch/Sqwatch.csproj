@@ -3,6 +3,18 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetName>sqwatch</TargetName>
+    <Authors>Matt Perkins</Authors>
+    <Version>0.1.0</Version>
+    <Product>sqwatch</Product>
+    <Copyright>(c) 2021 Matt Perkins</Copyright>
+    <PackageProjectUrl>https://github.com/mrperki/sqwatch</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/mrperki/sqwatch/blob/main/LICENSE</PackageLicenseUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="Dapper" Version="2.0.78" />
+  </ItemGroup>
 
 </Project>
