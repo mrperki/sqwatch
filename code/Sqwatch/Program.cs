@@ -1,5 +1,8 @@
 ﻿using CommandLine;
+using CommandLine.Text;
+using Sqwatch.Models;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Sqwatch
@@ -8,23 +11,41 @@ namespace Sqwatch
     {
         static int Main(string[] args)
         {
-            HelloWorld();
-
-            return Parser.Default.ParseArguments<Parameters>(args)
-                .MapResult(parameters => Run(parameters), _ => 1);
+            var parser = new Parser(config => config.HelpWriter = null);
+            var parserResult = parser.ParseArguments<Parameters>(args);
+            return parserResult.MapResult(
+                parameters => Run(parameters),
+                errors => DisplayHelp(parserResult, errors)
+                );
         }
 
-        static void HelloWorld()
+        static int DisplayHelp(ParserResult<Parameters> result, IEnumerable<Error> errors)
         {
-            Console.WriteLine($"sqwatch {Assembly.GetExecutingAssembly().GetName().Version}");
-            Console.WriteLine($"Copyright (c) 2021 Matt Perkins");
-            Console.WriteLine();
+            var helpText = HelpText.AutoBuild(result, h =>
+            {
+                h.Heading = $"sqwatch {Assembly.GetExecutingAssembly().GetName().Version}";
+                h.Copyright = "Copyright (c) 2021 Matt Perkins";
+                h.AddNewLineBetweenHelpSections = true;
+                h.AddEnumValuesToHelpText = true;
+                return HelpText.DefaultParsingErrorsHandler(result, h);
+            }, e => e);
+            Console.WriteLine(helpText);
+
+            return 1;
         }
 
         internal static int Run(Parameters parameters)
         {
-            // actual app logic goes here
+            Configuration.ApplyParameters(parameters);
+
+            //todo
             return 0;
+        }
+
+        internal static bool ValidateInput(Parameters parameters)
+        {
+            //todo
+            return true;
         }
     }
 }

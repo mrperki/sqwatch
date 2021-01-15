@@ -1,0 +1,28 @@
+﻿{
+  "namedConnections": [
+      {
+          "name": "_example_",
+          "connectionString": "Server=localhost;Database=ExampleDb;User Id=exampleuser;Password=1234"
+      }
+  ],
+    "namedQueries": [
+        {
+            "name": "_example_",
+            "query": "SELECT * FROM [dbo].[ExampleTbl] ORDER BY [Timestamp] DESC"
+        }
+    ],
+    /* Values to use if command line parameters are not supplied. Note that the application has fall-back default values in case any of these are missing */
+    "defaults": {
+        "maxExecutionSeconds": 120,
+        "queryIntervalMs": 1000,
+        "outputToConsole": false,
+        "outputToFile": true,
+        "fileName": ".\\sqwatch.result.json",
+        "ifFileExists": "Fail",
+        "maxFileSizeKb": 1024
+    },
+    "sqlSettings": {
+        "queryTimeoutSeconds": 60,
+        "transactionIsolationLevel": "ReadCommitted"
+    }
+}
