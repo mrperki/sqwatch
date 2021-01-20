@@ -1,17 +1,19 @@
 ﻿using Dapper;
-using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace Sqwatch
 {
-    public class QueryEngine : IDisposable
+    public class QueryEngine : IQueryEngine
     {
-        private readonly SqlConnection _connection;
+        private readonly IConfiguration _config;
+        private readonly IDbConnection _connection;
 
-        public QueryEngine(string connectionString)
+        public QueryEngine(IConfiguration config, IConnectionFactory factory)
         {
-            _connection = new SqlConnection(connectionString);
+            _config = config;
+            _connection = factory.Create();
         }
 
         public void Dispose()
@@ -22,8 +24,8 @@ namespace Sqwatch
 
         public IEnumerable<dynamic> ExecuteQuery()
         {
-            using var transaction = _connection.BeginTransaction(Configuration.TransactionIsolationLevel);
-            return _connection.Query(Configuration.Query, transaction: transaction);
+            using var transaction = _connection.BeginTransaction(_config.TransactionIsolationLevel);
+            return _connection.Query(_config.Query, transaction: transaction);
         }
     }
 }

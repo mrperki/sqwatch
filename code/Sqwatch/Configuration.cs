@@ -3,36 +3,42 @@ using Sqwatch.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 
 namespace Sqwatch
 {
-    internal static class Configuration
+    public class Configuration : IConfiguration
     {
-        private static readonly IDictionary<string, string> _namedConnections;
-        private static readonly IDictionary<string, string> _namedQueries;
-        private static readonly ConfigDefaults _defaults;
-        private static readonly ConfigSqlSettings _sqlSettings;
+        private readonly IDictionary<string, string> _namedConnections;
+        private readonly IDictionary<string, string> _namedQueries;
+        private readonly ConfigDefaults _defaults;
+        private readonly ConfigSqlSettings _sqlSettings;
         
-        private static Parameters _parameters;
+        private Parameters _parameters;
 
-        public static string ConnectionString { get; private set; }
-        public static string Query { get; private set; }
-        public static TimeSpan ExecutionTime { get; private set; }
-        public static int QueryIntervalMs => (int?)_parameters?.QueryIntervalMs ?? _defaults.QueryIntervalMs;
-        public static bool OutputToConsole => _parameters?.OutputToConsole ?? _defaults.OutputToConsole;
-        public static bool OutputToFile => !string.IsNullOrEmpty(_parameters?.OutputToFile) || _defaults.OutputToFile;
-        public static string FileName => _parameters?.OutputToFile ?? _defaults.FileName;
-        public static ExistingFileOperation IfFileExists => _parameters?.IfFileExists ?? _defaults.IfFileExists;
-        public static int QueryTimeoutSeconds => _sqlSettings.QueryTimeoutSeconds;
-        public static IsolationLevel TransactionIsolationLevel => _sqlSettings.TransactionIsolationLevel;
+        public string ConnectionString { get; private set; }
+        public string Query { get; private set; }
+        public TimeSpan ExecutionTime { get; private set; }
+        public int QueryIntervalMs => (int?)_parameters?.QueryIntervalMs ?? _defaults.QueryIntervalMs;
+        public bool OutputToConsole => _parameters?.OutputToConsole ?? _defaults.OutputToConsole;
+        public bool OutputToFile => !string.IsNullOrEmpty(_parameters?.OutputToFile) || _defaults.OutputToFile;
+        public string FileName => _parameters?.OutputToFile ?? _defaults.FileName;
+        public ExistingFileOperation IfFileExists => _parameters?.IfFileExists ?? _defaults.IfFileExists;
+        public int QueryTimeoutSeconds => _sqlSettings.QueryTimeoutSeconds;
+        public IsolationLevel TransactionIsolationLevel => _sqlSettings.TransactionIsolationLevel;
 
-        static Configuration()
-        {
-            var configRoot = new ConfigurationBuilder()
+        private static IConfigurationRoot DefaultConfigRoot()
+            => new ConfigurationBuilder()
                 .AddJsonFile("sqwatch.config.json", false, false)
                 .Build();
 
+        public Configuration() : this(DefaultConfigRoot())
+        {
+        }
+
+        internal Configuration(IConfigurationRoot configRoot)
+        {
             _namedConnections = configRoot.GetSection("namedConnections")
                 .Get<List<NamedConnection>>()
                 .ToDictionary(c => c.Name, c => c.ConnectionString);
@@ -49,23 +55,19 @@ namespace Sqwatch
             ExecutionTime = new TimeSpan(0, _defaults.MaxExecutionSeconds, 0);
         }
 
-        public static bool ValidateConnectionName(string connectionName) => _namedConnections.ContainsKey(connectionName);
-
-        public static bool ValidateQueryName(string queryName) => _namedQueries.ContainsKey(queryName);
-
-        public static void ApplyParameters(Parameters parameters)
+        public void ApplyParameters(Parameters parameters)
         {
             _parameters = parameters;
 
             ConnectionString = !string.IsNullOrEmpty(_parameters.ConnectionString)
                 ? _parameters.ConnectionString
-                : !string.IsNullOrEmpty(_parameters.ConnectionName) && ValidateConnectionName(_parameters.ConnectionName)
+                : !string.IsNullOrEmpty(_parameters.ConnectionName) && _namedConnections.ContainsKey(_parameters.ConnectionName)
                     ? _namedConnections[_parameters.ConnectionName]
                     : _namedConnections.FirstOrDefault().Value;
 
             Query = !string.IsNullOrEmpty(_parameters.QuerySql)
                 ? _parameters.QuerySql
-                : !string.IsNullOrEmpty(_parameters.QueryName) && ValidateQueryName(_parameters.QueryName)
+                : !string.IsNullOrEmpty(_parameters.QueryName) && _namedQueries.ContainsKey(_parameters.QueryName)
                     ? _namedQueries[_parameters.QueryName]
                     : _namedQueries.FirstOrDefault().Value;
 

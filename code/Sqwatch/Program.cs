@@ -1,25 +1,46 @@
 ﻿using CommandLine;
 using CommandLine.Text;
+using Microsoft.Extensions.DependencyInjection;
 using Sqwatch.Models;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace Sqwatch
 {
-    class Program
+    partial class Program
     {
+        internal static IServiceProvider ServiceProvider;
+
         static int Main(string[] args)
         {
+            Registration();            
+            
             var parser = new Parser(config => config.HelpWriter = null);
             var parserResult = parser.ParseArguments<Parameters>(args);
+
             return parserResult.MapResult(
                 parameters => Run(parameters),
-                errors => DisplayHelp(parserResult, errors)
+                errors => DisplayHelp(parserResult)
                 );
         }
 
-        static int DisplayHelp(ParserResult<Parameters> result, IEnumerable<Error> errors)
+        internal static int Run(Parameters parameters)
+        {
+            var result = ServiceProvider.GetRequiredService<IConfigurationValidator>()
+                .Validate(parameters);
+            if (!string.IsNullOrEmpty(result))
+            {
+                Console.WriteLine(result);
+                return 1;
+            }
+
+            ServiceProvider.GetRequiredService<IConfiguration>().ApplyParameters(parameters);
+
+            //todo
+            return 0;
+        }
+
+        static int DisplayHelp(ParserResult<Parameters> result)
         {
             var helpText = HelpText.AutoBuild(result, h =>
             {
@@ -34,18 +55,6 @@ namespace Sqwatch
             return 1;
         }
 
-        internal static int Run(Parameters parameters)
-        {
-            Configuration.ApplyParameters(parameters);
-
-            //todo
-            return 0;
-        }
-
-        internal static bool ValidateInput(Parameters parameters)
-        {
-            //todo
-            return true;
-        }
+        static partial void Registration();
     }
 }
