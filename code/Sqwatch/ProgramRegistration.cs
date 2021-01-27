@@ -11,6 +11,7 @@ namespace Sqwatch
                 .AddSingleton<IConfigurationValidator, ConfigurationValidator>()
                 .AddSingleton<IConnectionFactory, SqlConnectionFactory>()
                 .AddSingleton<IQueryEngine, QueryEngine>()
+                .AddSingleton<ILooper, Looper>()
                 .BuildServiceProvider();
         }
     }

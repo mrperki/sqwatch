@@ -36,7 +36,18 @@ namespace Sqwatch
 
             ServiceProvider.GetRequiredService<IConfiguration>().ApplyParameters(parameters);
 
-            //todo
+            using var queryEngine = ServiceProvider.GetRequiredService<IQueryEngine>();
+            var looper = ServiceProvider.GetRequiredService<ILooper>();
+
+            //todo: get initial result
+
+            var loopResult = looper.Loop(() =>
+            {
+                var result = queryEngine.ExecuteQuery();
+                //todo: compare with initial result
+                return false;
+            });
+
             return 0;
         }
 
