@@ -25,6 +25,7 @@ namespace Sqwatch
         public bool OutputToFile => !string.IsNullOrEmpty(_parameters?.OutputToFile) || _defaults.OutputToFile;
         public string FileName => _parameters?.OutputToFile ?? _defaults.FileName;
         public ExistingFileOperation IfFileExists => _parameters?.IfFileExists ?? _defaults.IfFileExists;
+        public int MaxFileSizeKb => ((int?)_parameters?.MaxFileSizeKb) ?? _defaults.MaxFileSizeKb;
         public int QueryTimeoutSeconds => _sqlSettings.QueryTimeoutSeconds;
         public IsolationLevel TransactionIsolationLevel => _sqlSettings.TransactionIsolationLevel;
 
@@ -41,11 +42,11 @@ namespace Sqwatch
         {
             _namedConnections = configRoot.GetSection("namedConnections")
                 .Get<List<NamedConnection>>()
-                .ToDictionary(c => c.Name, c => c.ConnectionString);
+                ?.ToDictionary(c => c.Name, c => c.ConnectionString);
 
             _namedQueries = configRoot.GetSection("namedQueries")
                 .Get<List<NamedQuery>>()
-                .ToDictionary(q => q.Name, q => q.Query);
+                ?.ToDictionary(q => q.Name, q => q.Query);
 
             _defaults = configRoot.GetSection("defaults").Get<ConfigDefaults>();
             _sqlSettings = configRoot.GetSection("sqlSettings").Get<ConfigSqlSettings>();
@@ -73,7 +74,7 @@ namespace Sqwatch
 
             ExecutionTime = _parameters.RunForSeconds.HasValue || _parameters.RunForMinutes.HasValue
                 ? new TimeSpan(0, (int?)_parameters.RunForMinutes ?? 0, (int?)_parameters.RunForSeconds ?? 0)
-                : new TimeSpan(0, _defaults.MaxExecutionSeconds, 0);
+                : new TimeSpan(0, 0, _defaults.MaxExecutionSeconds);
         }
     }
 }

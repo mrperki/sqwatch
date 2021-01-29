@@ -14,6 +14,7 @@ namespace Sqwatch
         bool OutputToFile { get; }
         string FileName { get; }
         ExistingFileOperation IfFileExists { get; }
+        int MaxFileSizeKb { get; }
         int QueryTimeoutSeconds { get; }
         IsolationLevel TransactionIsolationLevel { get; }
         void ApplyParameters(Parameters parameters);

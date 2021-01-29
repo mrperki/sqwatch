@@ -9,7 +9,7 @@ namespace Sqwatch.Models
         public bool OutputToConsole { get; set; } = false;
         public bool OutputToFile { get; set; } = true;
         public string FileName { get; set; } = ".\\sqwatch.result.json";
-        [JsonConverter(typeof(JsonStringEnumConverter))] public ExistingFileOperation IfFileExists { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))] public ExistingFileOperation IfFileExists { get; set; } = ExistingFileOperation.Fail;
         public int MaxFileSizeKb { get; set; } = 1024;
     }
 }
