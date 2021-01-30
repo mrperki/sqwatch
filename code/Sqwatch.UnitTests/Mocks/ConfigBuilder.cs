@@ -24,15 +24,15 @@ namespace Sqwatch.UnitTests.Mocks
             return this;
         }
 
-        public ConfigBuilder AddNamedConnection(NamedConnection namedConnection)
+        public ConfigBuilder AddNamedConnection(string name, string connectionString)
         {
-            _namedConnections.Add(namedConnection);
+            _namedConnections.Add(new NamedConnection { Name = name, ConnectionString = connectionString });
             return this;
         }
 
-        public ConfigBuilder AddNamedQuery(NamedQuery namedQuery)
+        public ConfigBuilder AddNamedQuery(string name, string query)
         {
-            _namedQueries.Add(namedQuery);
+            _namedQueries.Add(new NamedQuery { Name = name, Query = query });
             return this;
         }
 
